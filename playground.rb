@@ -1,9 +1,9 @@
 class Hangman
   def initialize
-    @letters = ('a'..'z').to_a
+
     @word = words.sample
     @lives = 7
-    @correct_guesses = []
+
     @word_teaser = ""
     @word.first.size.times do
       @word_teaser += "_ "
@@ -20,16 +20,19 @@ class Hangman
     ]
   end
 
-  def print_teaser last_guess
-    update_teaser unless last_guess.nil?
+  def print_teaser last_guess = nil
+    update_teaser(last_guess) unless last_guess.nil?
     puts @word_teaser
   end
 
-  def update_teaser
+  def update_teaser last_guess
     new_teaser = @word_teaser.split
     new_teaser.each_with_index do |letter, index|
-      if letter == '_'
+      if letter == '_' && @word.first[index] == last_guess
+        new_teaser[index] = last_guess
+      end
     end
+    @word_teaser = new_teaser.join(' ')
   end
 
   def make_guess
@@ -38,13 +41,17 @@ class Hangman
       guess = gets.chomp
 
       good_guess = @word.first.include? guess
-      if good_guess
+      if guess == "exit"
+        puts "Thank you for playing!"
+      elsif good_guess
         puts "Your are correct!"
-        @correct_guesses << guess
-        @letters.delete guess
 
         print_teaser guess
-        make_guess
+        if @word.first == @word_teaser.split.join
+          puts "Congratulations... you have won this round!"
+        else
+          make_guess
+        end
       else
         @lives -= 1
         puts "Sorry... you have #{ @lives } lives left. Try again"
@@ -58,7 +65,7 @@ class Hangman
 
   def begin
     puts "New game started... your word is #{ @word.first.size} characters long"
-
+    puts "To exit game at any point type 'exit'"
     print_teaser
 
     puts "Clue: #{ @word.last}"
